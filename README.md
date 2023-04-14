@@ -2,9 +2,21 @@
 
 Invokify is a lightweight library that allows you to run functions from a string or list of values.
 
+
+---
+
+## Installing
+Invokify is published on PyPI so you can easily install it with either `pip` or `poetry`.
+```shell
+pip install invokify
+```
+```shell
+poetry add invokify
+```
+---
 ## Getting started
 
-Let's create a few simple command-line commands.
+Let's create a simple command-line command.
 
 We can start by importing the `InvokeEngine` from invokify:
 

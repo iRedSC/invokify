@@ -218,7 +218,10 @@ class InvokeEngine:
         )
 
     def command(
-        self, func: callable = None, name: str = None, aliases: list[str] = None
+        self,
+        func: callable | Command = None,
+        name: str = None,
+        aliases: list[str] = None,
     ) -> Command:
         """A decorator that turns a function into a command"""
 
