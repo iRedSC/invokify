@@ -3,6 +3,7 @@ Invokify
 
 Allows the creation of parsible commands using decorators.
 """
+__all__ = ["CommandAlreadyExists", "EngineRequired", "meta", "Command", "InvokeEngine"]
 
 import functools
 from dataclasses import dataclass, field

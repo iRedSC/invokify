@@ -1,6 +1,7 @@
 from tokenstream import Token, TokenStream
 import re
 
+__all__ = ["string_to_args"]
 
 ESCAPE_REGEX = re.compile(r"\\.")
 
