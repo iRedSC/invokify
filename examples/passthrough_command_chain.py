@@ -45,21 +45,6 @@ def sell(amount: int, *args, obj: Player, responses: list = None, engine):
     return responses
 
 
-@engine.command
-def test1():
-    ...
-
-
-@test1.subcommand
-def test2():
-    ...
-
-
-@test2.subcommand
-def test3():
-    ...
-
-
 while True:
     user = input()
 
