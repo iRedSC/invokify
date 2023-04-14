@@ -7,6 +7,7 @@ __all__ = ["CommandAlreadyExists", "EngineRequired", "meta", "Command", "InvokeE
 
 import functools
 from dataclasses import dataclass, field
+from typing import Union
 
 
 class CommandAlreadyExists(Exception):
@@ -120,12 +121,9 @@ class Command:
     def __name__(self) -> str:
         return self.func.__name__
 
-    def _set_current_engine(self, engine: "InvokeEngine"):
-        self.engine = engine
-
     def subcommand(
         self,
-        func: callable = None,
+        func: Union[callable, "Command", meta] = None,
         name: str = None,
         aliases: list[str] = None,
     ) -> "Command":
@@ -219,7 +217,7 @@ class InvokeEngine:
 
     def command(
         self,
-        func: callable | Command = None,
+        func: Union[callable, Command, meta] = None,
         name: str = None,
         aliases: list[str] = None,
     ) -> Command:
