@@ -95,12 +95,18 @@ class meta:
 class Command:
     """A class that defines a command"""
 
-    func: callable
+    func: callable  # The function or method that was transformed into a Command.
     name: str
     aliases: list[str]
-    requires: dict[str, bool]
-    injections: dict[str, any]
-    children: dict[str, "Command"] = field(default_factory=dict)
+    requires: dict[
+        str, bool
+    ]  # The requirements for the command, this can be accessed for custom tests.
+    injections: dict[
+        str, any
+    ]  # Objects that will be injected into the command as kwargs.
+    children: dict[str, "Command"] = field(
+        default_factory=dict
+    )  # Similar to engine.commands; Lists the subcommands attached to a command.
     helptext: str = None
 
     def __call__(self, *args: any, engine: "InvokeEngine" = None, **kwargs: any) -> any:

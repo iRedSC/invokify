@@ -49,6 +49,7 @@ def test_inject_custom(engine: InvokeEngine):
     cmd, *_ = engine.parse(["thing"])
 
     assert cmd() == 10
+    assert thing() == 10
 
 
 def test_help_text(engine):
