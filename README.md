@@ -13,6 +13,8 @@ pip install invokify
 ```shell
 poetry add invokify
 ```
+This package is for python 3.10+
+
 ---
 ## Getting started
 
