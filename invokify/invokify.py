@@ -104,7 +104,7 @@ class Command:
         ..., Any
     ]  # The function or method that was transformed into a Command.
     name: str
-    aliases: list[str]
+    aliases: Optional[list[str]]
     requires: dict[
         str, bool
     ]  # The requirements for the command, this can be accessed for custom tests.
@@ -191,7 +191,7 @@ def create_command(
             )
 
         aliases.append(name)  # type: ignore
-        for name in aliases:
+        for name in aliases:  # type: ignore
             if commanddict.get(name):
                 raise CommandAlreadyExists
             # This will always be set to a command because in the above code,
