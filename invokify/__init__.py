@@ -7,7 +7,7 @@ __all__ = [
     "string_to_args",
 ]
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from invokify.invokify import *
 from invokify.parser import *
