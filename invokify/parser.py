@@ -1,3 +1,4 @@
+from typing import Any
 from tokenstream import Token, TokenStream
 import re
 
@@ -16,7 +17,7 @@ def unquote_string(token: Token) -> str:
     return ESCAPE_REGEX.sub(lambda match: ESCAPE_SEQUENCES[match[0]], token.value[1:-1])
 
 
-def parse_list(stream: TokenStream):
+def parse_list(stream: TokenStream) -> list[Any] | int | float | str | None:
     with stream.syntax(
         comma=r",\s*",
         decimal=r"-?\d*\.\d+|-?\d+\.\d*",
@@ -36,6 +37,8 @@ def parse_list(stream: TokenStream):
                 return entry.value
             case Token(type="string") as string:
                 return unquote_string(string)
+            case _:
+                pass
 
 
 def parse_token(token: Token, stream: TokenStream):
@@ -51,6 +54,8 @@ def parse_token(token: Token, stream: TokenStream):
             return int(integer.value)
         case Token(type="word") as word:
             return word.value
+        case _:
+            pass
 
 
 def string_to_args(string: str):

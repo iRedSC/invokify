@@ -30,13 +30,13 @@ def test_number_parsing():
     assert results == [1, 2, -54.6, -3, [0.6, 6.0, 98]]
 
 
-def test_parsing_simple(engine):
+def test_parsing_simple(engine: InvokeEngine):
     @engine.command
     def thing():
         return "hello"
 
     @thing.subcommand
-    def more():
+    def more():  # type: ignore
         return "greetings"
 
     result, *_ = engine.parse(command_list=["thing", "more"])

@@ -1,4 +1,5 @@
-from invokify import InvokeEngine, meta
+from typing import Any
+from invokify import InvokeEngine, meta, Command
 import pytest
 
 
@@ -10,7 +11,7 @@ def engine():
 def test_require_engine(engine: InvokeEngine):
     @engine.command
     @meta.require(engine=True)
-    def thing(engine):
+    def thing(engine: InvokeEngine):
         return engine.commands
 
     cmd, *_ = engine.parse(["thing"])
@@ -21,7 +22,7 @@ def test_require_engine(engine: InvokeEngine):
 def test_require_command(engine: InvokeEngine):
     @engine.command
     @meta.require(command=True)
-    def thing(command):
+    def thing(command: Command):
         return command.requires
 
     cmd, *_ = engine.parse(["thing"])
@@ -43,7 +44,7 @@ def test_inject_custom(engine: InvokeEngine):
 
     @engine.command
     @meta.inject(var=var)
-    def thing(var):
+    def thing(var: Any):
         return var
 
     cmd, *_ = engine.parse(["thing"])
@@ -52,10 +53,10 @@ def test_inject_custom(engine: InvokeEngine):
     assert thing() == 10
 
 
-def test_help_text(engine):
+def test_help_text(engine: InvokeEngine):
     @engine.command
     @meta.help("This is a command that does a thing.")
-    def thing():
+    def thing():  # type: ignore
         return "greetings"
 
     cmd, *_ = engine.parse(["thing"])
@@ -63,9 +64,9 @@ def test_help_text(engine):
     assert cmd.helptext == "This is a command that does a thing."
 
 
-def test_empty_help_text(engine):
+def test_empty_help_text(engine: InvokeEngine):
     @engine.command
-    def thing():
+    def thing():  # type: ignore
         return "greetings"
 
     cmd, *_ = engine.parse(["thing"])

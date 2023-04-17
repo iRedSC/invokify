@@ -7,11 +7,11 @@ def engine():
     return InvokeEngine()
 
 
-def test_create_engine(engine):
+def test_create_engine(engine: InvokeEngine):
     assert engine.commands == {}
 
 
-def test_create_command(engine):
+def test_create_command(engine: InvokeEngine):
     @engine.command
     def thing():
         return "hello"

@@ -7,7 +7,7 @@ def engine():
     return InvokeEngine()
 
 
-def test_create_subcommand(engine):
+def test_create_subcommand(engine: InvokeEngine):
     @engine.command
     def thing():
         ...
@@ -52,7 +52,7 @@ def test_stacking_subcommands(engine: InvokeEngine):
     @thing.subcommand
     @more.subcommand
     @engine.command
-    def extra():
+    def extra():  # type: ignore
         return "extra"
 
     cmd, *_ = engine.parse(["thing", "more"])

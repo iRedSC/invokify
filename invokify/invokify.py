@@ -7,7 +7,7 @@ __all__ = ["CommandAlreadyExists", "EngineRequired", "meta", "Command", "InvokeE
 
 import functools
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Any, Callable, Optional, Union
 
 
 class CommandAlreadyExists(Exception):
@@ -28,12 +28,14 @@ class meta:
     """Define requirements for a command, such as injecting itself into the function."""
 
     requires: dict[str, bool] = field(default_factory=dict)
-    injections: dict[str, any] = field(default_factory=dict)
-    func: callable = None
+    injections: dict[str, Any] = field(default_factory=dict)
+    func: Optional[Callable[..., Any]] = None
     helptext: str = ""
 
     @staticmethod
-    def require(engine: bool = False, command: bool = False, **kwargs: bool) -> "meta":
+    def require(
+        engine: bool = False, command: bool = False, **kwargs: bool
+    ) -> Callable[[Callable[..., Any] | "meta"], "meta|Command"]:
         """
         Specifies the requirements for a command.
         `engine` and `command` are considered special and will be
@@ -43,7 +45,7 @@ class meta:
         and can be used for evaluation.
         """
 
-        def wrapper(func: any) -> "meta":
+        def wrapper(func: Callable[..., Any] | "meta") -> meta | Command:
             if isinstance(func, meta):
                 raise TypeError("meta.require cannot be passed a command object.")
             if not isinstance(func, Command):
@@ -54,17 +56,20 @@ class meta:
                     helptext="",
                 )
             func.requires = {"engine": engine, "command": command, **kwargs}
+            return func
 
         return wrapper
 
     @staticmethod
-    def inject(**kwargs: bool) -> "meta":
+    def inject(
+        **kwargs: Any,
+    ) -> Callable[[Callable[..., Any] | "meta"], "meta|Command"]:
         """
         Specifies objects to inject into the function.
         The function's argument must match the injection's argument.
         """
 
-        def wrapper(func: any):
+        def wrapper(func: Callable[..., Any] | "meta") -> "meta|Command":
             if isinstance(func, Command):
                 raise TypeError("meta.inject cannot be passed a command object.")
             if not isinstance(func, meta):
@@ -75,12 +80,12 @@ class meta:
         return wrapper
 
     @staticmethod
-    def help(text: str) -> "meta":
+    def help(text: str) -> Callable[[Callable[..., Any] | "meta"], "meta|Command"]:
         """
         Creates a help text for a command.
         """
 
-        def wrapper(func: any):
+        def wrapper(func: Callable[..., Any] | "meta") -> "meta|Command":
             if isinstance(func, Command):
                 raise TypeError("meta.inject cannot be passed a command object.")
             if not isinstance(func, meta):
@@ -95,21 +100,25 @@ class meta:
 class Command:
     """A class that defines a command"""
 
-    func: callable  # The function or method that was transformed into a Command.
+    func: Callable[
+        ..., Any
+    ]  # The function or method that was transformed into a Command.
     name: str
     aliases: list[str]
     requires: dict[
         str, bool
     ]  # The requirements for the command, this can be accessed for custom tests.
     injections: dict[
-        str, any
+        str, Any
     ]  # Objects that will be injected into the command as kwargs.
     children: dict[str, "Command"] = field(
         default_factory=dict
     )  # Similar to engine.commands; Lists the subcommands attached to a command.
-    helptext: str = None
+    helptext: Optional[str] = None
 
-    def __call__(self, *args: any, engine: "InvokeEngine" = None, **kwargs: any) -> any:
+    def __call__(
+        self, *args: Any, engine: Optional["InvokeEngine"] = None, **kwargs: Any
+    ) -> Any:
         if self.requires.get("engine"):
             if engine is None:
                 raise EngineRequired
@@ -129,9 +138,9 @@ class Command:
 
     def subcommand(
         self,
-        func: Union[callable, "Command", meta] = None,
-        name: str = None,
-        aliases: list[str] = None,
+        func: Optional[Union[Callable[..., Any], "Command", meta]] = None,
+        name: Optional[str] = None,
+        aliases: Optional[list[str]] = None,
     ) -> "Command":
         """A decorator that turns a function into a subcommand"""
 
@@ -143,13 +152,18 @@ class Command:
         )
 
 
-def create_command(func: callable, commanddict: dict, name: str, aliases: list[str]):
+def create_command(
+    func: Optional[Callable[..., Any] | meta],
+    commanddict: dict[str, Command],
+    name: Optional[str],
+    aliases: Optional[list[str]],
+) -> Command:
     """Creates a command."""
     if aliases is None:
         aliases = []
 
-    @functools.wraps(func)
-    def wrapper(func: callable):
+    @functools.wraps(func)  # type: ignore
+    def wrapper(func: Callable[..., Any] | Command | meta) -> Command:
         nonlocal aliases
         nonlocal name
 
@@ -160,32 +174,34 @@ def create_command(func: callable, commanddict: dict, name: str, aliases: list[s
             requires = func.requires
             inject = func.injections
             helptext = func.helptext
-            func = func.func
+            func = func.func  # type: ignore
 
         if name is None:
-            name = func.__name__
+            name = func.__name__  # type: ignore
 
         command = func
         if not isinstance(func, Command):
             command = Command(
-                func=func,
-                name=name,
+                func=func,  # type: ignore
+                name=name,  # type: ignore
                 aliases=aliases,
                 requires=requires,
                 injections=inject,
                 helptext=helptext,
             )
 
-        aliases.append(name)
+        aliases.append(name)  # type: ignore
         for name in aliases:
             if commanddict.get(name):
                 raise CommandAlreadyExists
-            commanddict[name] = command
-        return command
+            # This will always be set to a command because in the above code,
+            # if command is not a Command, it will be set as one.
+            commanddict[name] = command  # type: ignore
+        return command  # type: ignore
 
     if func:
         return wrapper(func)
-    return wrapper
+    return wrapper  # type: ignore
 
 
 @dataclass(slots=True)
@@ -196,18 +212,18 @@ class InvokeEngine:
 
     def parse(
         self,
-        command_list: list[any],
-        _command: Command = None,
-        _callstack: list[Command] = None,
-    ) -> tuple[Command, tuple[any, ...], tuple[Command, ...]]:
+        command_list: list[Any],
+        _command: Optional[Command] = None,
+        _callstack: Optional[list[Command]] = None,
+    ) -> tuple[Command, tuple[Any, ...], tuple[Command, ...]]:
         """Parses a list to find the lowest level subcommand, and passes the rest of the arguments back."""
         if _callstack is None:
             _callstack = []
         else:
-            _callstack.append(_command)
+            _callstack.append(_command)  # type: ignore
 
         if len(command_list) == 0:
-            return (_command, command_list, tuple(_callstack))
+            return (_command, command_list, tuple(_callstack))  # type: ignore
 
         if _command is None:
             command = self.commands.get(command_list[0])
@@ -215,7 +231,7 @@ class InvokeEngine:
             command = _command.children.get(command_list[0])
 
         if command is None:
-            return (_command, command_list, tuple(_callstack))
+            return (_command, command_list, tuple(_callstack))  # type: ignore
 
         return self.parse(
             command_list=command_list[1:], _command=command, _callstack=_callstack
@@ -223,9 +239,9 @@ class InvokeEngine:
 
     def command(
         self,
-        func: Union[callable, Command, meta] = None,
-        name: str = None,
-        aliases: list[str] = None,
+        func: Optional[Union[Callable[..., Any], Command, meta]] = None,
+        name: Optional[str] = None,
+        aliases: Optional[list[str]] = None,
     ) -> Command:
         """A decorator that turns a function into a command"""
 

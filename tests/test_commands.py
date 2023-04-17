@@ -7,37 +7,37 @@ def engine():
     return InvokeEngine()
 
 
-def test_adding_multiple_aliases(engine):
+def test_adding_multiple_aliases(engine: InvokeEngine):
     @engine.command
-    def thing():
+    def thing():  # type: ignore
         return "hello"
 
     with pytest.raises(CommandAlreadyExists):
 
         @engine.command(name="thing")
-        def more():
+        def more():  # type: ignore
             return "greeting"
 
 
-def test_adding_duplicate_aliases(engine):
+def test_adding_duplicate_aliases(engine: InvokeEngine):
     @engine.command(aliases=["other", "cool"])
-    def thing():
+    def thing():  # type: ignore
         return "hello"
 
     with pytest.raises(CommandAlreadyExists):
 
         @engine.command(aliases=["cool"])
-        def more():
+        def more():  # type: ignore
             return "greeting"
 
 
-def test_aliases(engine):
+def test_aliases(engine: InvokeEngine):
     @engine.command(aliases=["other", "cool"])
     def thing():
         return "hello"
 
     @thing.subcommand(aliases=["special", "stuff"])
-    def more():
+    def more():  # type: ignore
         return "greetings"
 
     assert engine.parse(["other"])[0]() == "hello"
@@ -49,7 +49,7 @@ def test_aliases(engine):
     assert engine.parse(["thing", "stuff"])[0]() == "greetings"
 
 
-def test_command_in_class(engine):
+def test_command_in_class(engine: InvokeEngine):
     class Guy:
         def __init__(self):
             self.money = 0
@@ -89,7 +89,7 @@ def test_multiple_engines():
     @engine3.command(aliases=["extra", "stuff"])
     @engine2.command(name="more")
     @engine1.command
-    def thing():
+    def thing():  # type: ignore
         return "greetings"
 
     cmd, *_ = engine1.parse(["thing"])
