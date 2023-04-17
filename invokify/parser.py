@@ -38,7 +38,7 @@ def parse_list(stream: TokenStream) -> list[Any] | int | float | str | None:
             case Token(type="string") as string:
                 return unquote_string(string)
             case _:
-                return
+                return None
 
 
 def parse_token(token: Token, stream: TokenStream):
@@ -55,7 +55,7 @@ def parse_token(token: Token, stream: TokenStream):
         case Token(type="word") as word:
             return word.value
         case _:
-            return
+            return None
 
 
 def string_to_args(string: str):
