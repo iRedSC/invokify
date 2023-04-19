@@ -90,7 +90,7 @@ def create_deck() -> list[Card]:
             if value > 10:
                 value = 10
             if value == 1:
-                value = (1, 10)
+                value = (1, 11)
 
             deck.append(Card(suit=suit, value=value))
     return deck
